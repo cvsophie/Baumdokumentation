@@ -4,276 +4,190 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fletzer Baumdokumentation</title>
+  <!-- Tailwind & jsPDF -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jsPDF direkt via CDN für robuste, absturzfreie PDF-Generierung -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
     .bg-forest { background-color: #123925; }
     .text-forest { color: #123925; }
-    .border-forest { border-color: #123925; }
-    .hover-bg-forest-dark:hover { background-color: #0c2618; }
+    .hover-forest:hover { background-color: #0c2618; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased">
+<body class="bg-gray-50 text-gray-800 min-h-screen">
 
-  <!-- Header -->
-  <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+  <!-- Kopfzeile -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-forest text-white flex items-center justify-center font-bold text-xl shadow-inner">
-          F
-        </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight text-gray-900">Fletzer Baumdokumentation</h1>
-        </div>
+        <div class="w-9 h-9 rounded-lg bg-forest text-white font-bold flex items-center justify-center text-lg">F</div>
+        <span class="text-lg font-bold text-gray-900 tracking-tight">Fletzer Baumdokumentation</span>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="emailBtnTop" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm transition">
-          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-          Per E-Mail
-        </button>
-        <button id="downloadPdfBtn" type="button" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg text-white bg-forest hover-bg-forest-dark shadow transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span id="downloadBtnText">PDF erstellen & laden</span>
-        </button>
-      </div>
+      <button id="btnDownload" class="px-4 py-2 bg-forest hover-forest text-white text-sm font-semibold rounded-lg shadow transition">
+        📄 PDF-Report herunterladen
+      </button>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Hauptbereich -->
+  <main class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
     
     <!-- Linke Spalte: Stammdaten & Upload -->
-    <div class="lg:col-span-5 space-y-6">
+    <div class="md:col-span-5 space-y-6">
       
-      <!-- Stammdaten Karte -->
-      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <h2 class="text-base font-bold text-gray-900 border-b pb-3 mb-4 flex items-center justify-between">
-          <span>1. Stammdaten (Deckblatt)</span>
-          <span class="text-xs font-normal text-gray-500">Seite 1</span>
-        </h2>
+      <!-- 1. Stammdaten -->
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-b pb-2">1. Stammdaten (Deckblatt)</h2>
         
-        <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Auftraggeber *</label>
+          <input type="text" id="client" value="Magistrat Wien" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Adresse / Standort *</label>
+          <input type="text" id="address" value="Stadtpark 1" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Auftraggeber *</label>
-            <input type="text" id="clientInput" placeholder="z. B. Stadtgemeinde / Fam. Huber" value="Magistrat Wien - MA 42" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">PLZ *</label>
+            <input type="text" id="zip" value="1010" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800">
           </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Adresse / Standort *</label>
-            <input type="text" id="addressInput" placeholder="z. B. Schlossallee 12 / Stadtpark Ost" value="Stadtpark Promenade 4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
-          </div>
-
-          <div class="grid grid-cols-3 gap-3">
-            <div class="col-span-1">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">PLZ *</label>
-              <input type="text" id="zipInput" value="1010" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
-            </div>
-            <div class="col-span-2">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Ort *</label>
-              <input type="text" id="cityInput" value="Wien" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Datum der Kontrolle *</label>
-            <input type="date" id="dateInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
-          </div>
-
-          <!-- Ist Naturdenkmal (IstND) -->
-          <div class="pt-2 border-t border-gray-100">
-            <div class="flex items-center justify-between p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
-              <div class="flex items-center space-x-3">
-                <input type="checkbox" id="isNdCheckbox" class="w-4 h-4 text-emerald-800 rounded border-gray-300 focus:ring-emerald-800">
-                <label for="isNdCheckbox" class="text-sm font-semibold text-gray-800 cursor-pointer">
-                  Naturdenkmal (IstND)
-                </label>
-              </div>
-              <span class="text-xs text-emerald-800 bg-white px-2 py-0.5 rounded font-medium border border-emerald-200">ND-Status</span>
-            </div>
-
-            <div id="ndNumberContainer" class="hidden mt-3">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">ND-Nummer (optional)</label>
-              <input type="text" id="ndNumberInput" placeholder="z. B. ND-W-204" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Gesamtfazit / Anmerkung (Seite 1)</label>
-            <textarea id="summaryNotes" rows="3" placeholder="Zusammenfassung der Kontrolle..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">Sicht- und Zustandskontrolle planmäßig durchgeführt. Handlungsbedarf bei den markierten Schadstellen dokumentiert.</textarea>
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Ort *</label>
+            <input type="text" id="city" value="Wien" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800">
           </div>
         </div>
-      </section>
 
-      <!-- Upload Karte -->
-      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <h2 class="text-base font-bold text-gray-900 border-b pb-3 mb-4">
-          2. Fotos & Ordner hochladen
-        </h2>
-
-        <div id="dropArea" class="border-2 border-dashed border-gray-300 hover:border-emerald-700 rounded-xl p-6 text-center bg-gray-50/60 transition cursor-pointer">
-          <svg class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-          <p class="text-sm font-semibold text-gray-700">Fotos hier hineinziehen oder auswählen</p>
-          <p class="text-xs text-gray-500 mt-1">Unterstützt JPG, PNG, WEBP</p>
-          
-          <div class="mt-4 flex flex-wrap justify-center gap-2">
-            <button type="button" id="btnSelectFiles" class="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-300 rounded-lg hover:bg-gray-100 shadow-sm">
-              Fotos wählen
-            </button>
-            <button type="button" id="btnSelectFolder" class="px-3 py-1.5 text-xs font-semibold bg-forest text-white rounded-lg hover-bg-forest-dark shadow-sm">
-              Ganzen Foto-Ordner wählen
-            </button>
-          </div>
-          <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
-          <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Datum *</label>
+          <input type="date" id="date" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800">
         </div>
-      </section>
+
+        <!-- IstND Checkbox -->
+        <div class="pt-2 border-t">
+          <label class="flex items-center space-x-2 text-sm font-semibold cursor-pointer">
+            <input type="checkbox" id="isNd" class="w-4 h-4 rounded text-emerald-800 focus:ring-emerald-800">
+            <span>Naturdenkmal (IstND)</span>
+          </label>
+          <div id="ndBox" class="hidden mt-2">
+            <label class="block text-xs text-gray-500 mb-1">ND-Nummer (optional)</label>
+            <input type="text" id="ndNum" placeholder="z. B. ND-102" class="w-full px-3 py-2 border rounded-lg text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Gesamtfazit</label>
+          <textarea id="notes" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm">Regelmäßige Kontrolle durchgeführt. Befunde und Maßnahmen siehe Folgeseiten.</textarea>
+        </div>
+      </div>
+
+      <!-- 2. Foto Upload -->
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-b pb-2">2. Fotos hinzufügen</h2>
+        
+        <!-- Versteckte Inputs -->
+        <input type="file" id="inputFiles" multiple accept="image/*" class="hidden">
+        <input type="file" id="inputFolder" webkitdirectory directory multiple class="hidden">
+
+        <!-- Upload Buttons (sauber getrennt, keine Klick-Konflikte) -->
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" id="btnTriggerFiles" class="w-full py-3 px-3 bg-white border-2 border-dashed border-gray-300 hover:border-emerald-700 rounded-xl text-center transition flex flex-col items-center justify-center">
+            <span class="text-xl">📸</span>
+            <span class="text-xs font-bold text-gray-800 mt-1">Fotos wählen</span>
+            <span class="text-[10px] text-gray-400">Einzeln oder mehrere</span>
+          </button>
+
+          <button type="button" id="btnTriggerFolder" class="w-full py-3 px-3 bg-emerald-50/50 border-2 border-dashed border-emerald-300 hover:border-emerald-700 rounded-xl text-center transition flex flex-col items-center justify-center">
+            <span class="text-xl">📁</span>
+            <span class="text-xs font-bold text-emerald-900 mt-1">Ordner wählen</span>
+            <span class="text-[10px] text-emerald-700">Ganzen Foto-Ordner</span>
+          </button>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center text-xs text-gray-500 hover:bg-gray-50 transition">
+          Oder Fotos per Drag & Drop hier ablegen
+        </div>
+      </div>
 
     </div>
 
     <!-- Rechte Spalte: Foto-Liste & Beschreibungen -->
-    <div class="lg:col-span-7 space-y-6">
-      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <div class="flex items-center justify-between border-b pb-3 mb-4">
-          <div>
-            <h2 class="text-base font-bold text-gray-900">3. Fotoseiten (Je 1 Foto pro Seite)</h2>
-            <p class="text-xs text-gray-500 mt-0.5" id="photoCountNotice">0 Fotos vorhanden</p>
-          </div>
-          <button id="clearAllBtn" type="button" class="text-xs text-red-600 hover:underline font-medium hidden">
-            Alle löschen
-          </button>
+    <div class="md:col-span-7">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+          <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
+            3. Fotoseiten (<span id="photoCount">0</span> Fotos)
+          </h2>
+          <span class="text-xs text-gray-400">Jedes Foto = 1 eigene A4-Seite</span>
         </div>
 
-        <div id="photosList" class="space-y-5">
-          <div id="emptyPhotosState" class="py-12 text-center text-gray-400">
-            <p class="text-sm">Noch keine Fotos hochgeladen.</p>
-            <p class="text-xs mt-1">Lade oben Fotos hoch – jedes Foto erhält im fertigen Report eine eigene DIN-A4-Seite.</p>
+        <div id="photoContainer" class="space-y-4">
+          <div id="emptyMsg" class="py-16 text-center text-gray-400 text-sm">
+            Noch keine Fotos hochgeladen. Klicke links auf <b>Fotos wählen</b> oder <b>Ordner wählen</b>.
           </div>
         </div>
-      </section>
+      </div>
     </div>
 
   </main>
 
-  <!-- E-Mail Modal -->
-  <div id="emailModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <h3 class="text-lg font-bold text-gray-900">Report per E-Mail versenden</h3>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Empfänger-Adresse</label>
-        <input type="email" id="emailTo" placeholder="kunde@beispiel.at" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Betreff</label>
-        <input type="text" id="emailSubject" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nachricht</label>
-        <textarea id="emailBody" rows="4" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800"></textarea>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button id="emailCancelBtn" type="button" class="px-4 py-2 border rounded-lg text-sm text-gray-700 hover:bg-gray-50">Abbrechen</button>
-        <button id="emailConfirmBtn" type="button" class="px-4 py-2 bg-forest text-white rounded-lg text-sm font-semibold hover-bg-forest-dark">E-Mail öffnen & senden</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Status Toast -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm hidden transition-all duration-300">
-    <span id="toastMsg">Hinweis</span>
-  </div>
-
   <script>
-    // App State
+    // 1. Datum initialisieren
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+    // 2. Naturdenkmal Einblenden/Ausblenden
+    const isNd = document.getElementById('isNd');
+    const ndBox = document.getElementById('ndBox');
+    isNd.addEventListener('change', () => ndBox.classList.toggle('hidden', !isNd.checked));
+
+    // 3. Status-Array für Fotos
     let photos = [];
-    const dateInput = document.getElementById('dateInput');
-    dateInput.value = new Date().toISOString().split('T')[0];
 
-    // UI Referenzen
-    const isNdCheckbox = document.getElementById('isNdCheckbox');
-    const ndNumberContainer = document.getElementById('ndNumberContainer');
-    const dropArea = document.getElementById('dropArea');
-    const fileInput = document.getElementById('fileInput');
-    const folderInput = document.getElementById('folderInput');
-    const btnSelectFiles = document.getElementById('btnSelectFiles');
-    const btnSelectFolder = document.getElementById('btnSelectFolder');
-    const photosList = document.getElementById('photosList');
-    const emptyPhotosState = document.getElementById('emptyPhotosState');
-    const photoCountNotice = document.getElementById('photoCountNotice');
-    const clearAllBtn = document.getElementById('clearAllBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const downloadBtnText = document.getElementById('downloadBtnText');
-    const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toastMsg');
+    // Elemente
+    const inputFiles = document.getElementById('inputFiles');
+    const inputFolder = document.getElementById('inputFolder');
+    const btnTriggerFiles = document.getElementById('btnTriggerFiles');
+    const btnTriggerFolder = document.getElementById('btnTriggerFolder');
+    const dropZone = document.getElementById('dropZone');
+    const photoContainer = document.getElementById('photoContainer');
+    const emptyMsg = document.getElementById('emptyMsg');
+    const photoCount = document.getElementById('photoCount');
+    const btnDownload = document.getElementById('btnDownload');
 
-    function showToast(msg, duration = 3000) {
-      toastMsg.innerText = msg;
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), duration);
-    }
+    // Klick-Handler sauber verknüpfen
+    btnTriggerFiles.onclick = () => inputFiles.click();
+    btnTriggerFolder.onclick = () => inputFolder.click();
 
-    isNdCheckbox.addEventListener('change', () => {
-      ndNumberContainer.classList.toggle('hidden', !isNdCheckbox.checked);
+    inputFiles.onchange = (e) => handleSelectedFiles(e.target.files);
+    inputFolder.onchange = (e) => handleSelectedFiles(e.target.files);
+
+    // Drag and Drop
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-600', 'bg-emerald-50'); });
     });
-
-    // File Picker Trigger
-    btnSelectFiles.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
-    btnSelectFolder.addEventListener('click', (e) => { e.stopPropagation(); folderInput.click(); });
-    dropArea.addEventListener('click', (e) => {
-      if (!e.target.closest('button')) fileInput.click();
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('border-emerald-600', 'bg-emerald-50'); });
     });
-
-    ['dragenter', 'dragover'].forEach(ev => dropArea.addEventListener(ev, (e) => {
-      e.preventDefault(); e.stopPropagation();
-      dropArea.classList.add('border-emerald-600', 'bg-emerald-50/30');
-    }));
-    ['dragleave', 'drop'].forEach(ev => dropArea.addEventListener(ev, (e) => {
-      e.preventDefault(); e.stopPropagation();
-      dropArea.classList.remove('border-emerald-600', 'bg-emerald-50/30');
-    }));
-
-    dropArea.addEventListener('drop', (e) => {
-      handleFiles(Array.from(e.dataTransfer.files));
-    });
-    fileInput.addEventListener('change', (e) => {
-      handleFiles(Array.from(e.target.files));
-      fileInput.value = '';
-    });
-    folderInput.addEventListener('change', (e) => {
-      handleFiles(Array.from(e.target.files));
-      folderInput.value = '';
-    });
-
-    clearAllBtn.addEventListener('click', () => {
-      if (confirm('Möchtest du wirklich alle hochgeladenen Fotos entfernen?')) {
-        photos = [];
-        renderPhotosList();
+    dropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files.length) {
+        handleSelectedFiles(e.dataTransfer.files);
       }
     });
 
-    // Fotos komprimieren und in Base64 umwandeln (verhindert Browser-Abstürze)
-    function processImageFile(file) {
+    // Bildverarbeitung (Skalieren auf web-freundliche Größe gegen Speicherabstürze)
+    function processImage(file) {
       return new Promise((resolve) => {
-        if (!file.type.startsWith('image/')) return resolve(null);
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
-            const maxDim = 1600;
-            let w = img.width;
-            let h = img.height;
-            if (w > maxDim || h > maxDim) {
-              if (w > h) {
-                h = Math.round((h * maxDim) / w);
-                w = maxDim;
-              } else {
-                w = Math.round((w * maxDim) / h);
-                h = maxDim;
-              }
+            const max = 1400;
+            let w = img.width, h = img.height;
+            if (w > max || h > max) {
+              if (w > h) { h = Math.round((h * max) / w); w = max; }
+              else { w = Math.round((w * max) / h); h = max; }
             }
             const canvas = document.createElement('canvas');
             canvas.width = w;
@@ -281,14 +195,13 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             resolve({
-              id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+              id: 'id_' + Math.random().toString(36).substr(2, 9),
               filename: file.name,
-              dataUrl: canvas.toDataURL('image/jpeg', 0.85),
+              dataUrl: canvas.toDataURL('image/jpeg', 0.8),
               width: w,
               height: h,
               title: file.name.replace(/\.[^/.]+$/, ""),
-              description: 'Zustandserfassung und Befundung zum Fotomotiv.',
-              status: 'Auffälligkeit'
+              description: 'Befund zur Schadstelle bzw. Auffälligkeit am Baum.'
             });
           };
           img.onerror = () => resolve(null);
@@ -299,47 +212,230 @@
       });
     }
 
-    async function handleFiles(files) {
-      const validFiles = files.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name));
-      if (!validFiles.length) {
-        showToast('Keine Bilddateien gefunden.');
+    async function handleSelectedFiles(fileList) {
+      const files = Array.from(fileList).filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+      if (!files.length) {
+        alert('Keine gültigen Bilddateien erkannt.');
         return;
       }
-      showToast(`${validFiles.length} Bild(er) werden vorbereitet...`);
-      const processed = await Promise.all(validFiles.map(processImageFile));
-      const successful = processed.filter(Boolean);
-      photos = [...photos, ...successful];
-      renderPhotosList();
-      showToast(`${successful.length} Fotos hinzugefügt.`);
+      for (const f of files) {
+        const p = await processImage(f);
+        if (p) photos.push(p);
+      }
+      renderList();
+      inputFiles.value = '';
+      inputFolder.value = '';
     }
 
-    function renderPhotosList() {
-      photoCountNotice.innerText = `${photos.length} Foto(s) im Report (=${photos.length + 1} Seiten gesamt)`;
-      clearAllBtn.classList.toggle('hidden', photos.length === 0);
-
+    function renderList() {
+      photoCount.innerText = photos.length;
       if (photos.length === 0) {
-        emptyPhotosState.classList.remove('hidden');
-        photosList.innerHTML = '';
-        photosList.appendChild(emptyPhotosState);
+        emptyMsg.classList.remove('hidden');
+        photoContainer.innerHTML = '';
+        photoContainer.appendChild(emptyMsg);
         return;
       }
+      emptyMsg.classList.add('hidden');
+      photoContainer.innerHTML = '';
 
-      emptyPhotosState.classList.add('hidden');
-      photosList.innerHTML = '';
-
-      photos.forEach((photo, idx) => {
-        const item = document.createElement('div');
-        item.className = 'border border-gray-200 rounded-xl p-4 bg-white flex flex-col md:flex-row gap-4 items-start shadow-sm';
-        item.innerHTML = `
-          <div class="relative w-full md:w-44 h-36 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-            <img src="${photo.dataUrl}" alt="Vorschau" class="w-full h-full object-cover">
-            <span class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2 py-0.5 rounded">
+      photos.forEach((p, idx) => {
+        const card = document.createElement('div');
+        card.className = "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl bg-gray-50/50 items-start";
+        card.innerHTML = `
+          <div class="relative w-full sm:w-36 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+            <img src="${p.dataUrl}" class="w-full h-full object-cover">
+            <span class="absolute top-1 left-1 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
               Seite ${idx + 2}
             </span>
           </div>
+          <div class="flex-1 w-full space-y-2">
+            <div class="flex justify-between items-center">
+              <input type="text" value="${p.title}" class="font-bold text-sm bg-transparent border-b border-gray-300 focus:outline-none focus:border-forest w-full mr-2" oninput="photos[${idx}].title = this.value">
+              <button onclick="deletePhoto(${idx})" class="text-red-500 text-xs hover:underline flex-shrink-0">Löschen</button>
+            </div>
+            <textarea rows="2" class="w-full p-2 text-xs border rounded-lg bg-white" placeholder="Beschreibung..." oninput="photos[${idx}].description = this.value">${p.description}</textarea>
+            <div class="text-[10px] text-gray-400 truncate">${p.filename}</div>
+          </div>
+        `;
+        photoContainer.appendChild(card);
+      });
+    }
 
-          <div class="flex-1 w-full space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <input type="text" value="${escapeHtml(photo.title)}" class="font-bold text-sm text-gray-900 border-b border-dashed border-gray-300 hover:border-gray-600 focus:border-forest outline-none py-0.5 flex-1" placeholder="Titel / Bezeichnung" data-id="${photo.id}" data-field="title">
-              
-              <select class="text-xs font-semibold px-2.5 py-1 rounded-md border border-gray-300
+    window.deletePhoto = (idx) => {
+      photos.splice(idx, 1);
+      renderList();
+    };
+
+    // 4. PDF Erstellung via jsPDF
+    btnDownload.onclick = () => {
+      try {
+        btnDownload.disabled = true;
+        btnDownload.innerText = 'PDF wird generiert...';
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+        const client = document.getElementById('client').value || '-';
+        const address = document.getElementById('address').value || '-';
+        const zip = document.getElementById('zip').value || '';
+        const city = document.getElementById('city').value || '';
+        const date = document.getElementById('date').value || '-';
+        const isNdVal = document.getElementById('isNd').checked;
+        const ndNumVal = document.getElementById('ndNum').value || '-';
+        const notes = document.getElementById('notes').value || '';
+
+        // --- SEITE 1: STAMMDATEN ---
+        doc.setFillColor(18, 57, 37); // dunkelgrün
+        doc.rect(0, 0, 210, 28, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text("Fletzer Baumdokumentation", 20, 15);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text("BAUMKONTROLL-BERICHT", 20, 22);
+
+        // Kasten Stammdaten
+        doc.setDrawColor(220, 220, 220);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(20, 38, 170, 70, 2, 2, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(18, 57, 37);
+        doc.text("1. STAMMDATEN", 26, 48);
+        doc.line(26, 51, 184, 51);
+
+        doc.setFontSize(9);
+        const meta = [
+          ["Auftraggeber:", client],
+          ["Standort:", `${address}, ${zip} ${city}`],
+          ["Datum:", date],
+          ["Naturdenkmal (IstND):", isNdVal ? `JA (Nr: ${ndNumVal})` : "NEIN"],
+          ["Fotos im Anhang:", `${photos.length} Fotoseite(n)`]
+        ];
+
+        let y = 60;
+        meta.forEach(([k, v]) => {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(100, 100, 100);
+          doc.text(k, 26, y);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(20, 20, 20);
+          doc.text(v, 75, y);
+          y += 8;
+        });
+
+        // Kasten Fazit
+        doc.roundedRect(20, 118, 170, 45, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(18, 57, 37);
+        doc.text("2. ZUSAMMENFASSUNG", 26, 128);
+        doc.line(26, 131, 184, 131);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(40, 40, 40);
+        const splitNotes = doc.splitTextToSize(notes, 158);
+        doc.text(splitNotes, 26, 139);
+
+        // Kasten Übersicht
+        doc.roundedRect(20, 173, 170, 95, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(18, 57, 37);
+        doc.text("3. ÜBERSICHT DER BILDDOKUMENTATION", 26, 183);
+        doc.line(26, 186, 184, 186);
+
+        let py = 195;
+        doc.setFontSize(8.5);
+        if (photos.length === 0) {
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(120, 120, 120);
+          doc.text("Keine Fotos vorhanden.", 26, py);
+        } else {
+          photos.slice(0, 9).forEach((p, i) => {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(30, 30, 30);
+            doc.text(`Seite ${i + 2}: ${p.title}`, 26, py);
+            py += 7;
+          });
+          if (photos.length > 9) {
+            doc.text(`... und ${photos.length - 9} weitere Fotoseiten.`, 26, py);
+          }
+        }
+
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text("Fletzer Baumdokumentation · Seite 1", 105, 287, { align: 'center' });
+
+        // --- FOLGESEITEN: JE 1 FOTO PRO SEITE ---
+        photos.forEach((p, idx) => {
+          doc.addPage('a4', 'p');
+          
+          // Header Folgeseite
+          doc.setFillColor(245, 245, 245);
+          doc.rect(0, 0, 210, 14, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.setTextColor(18, 57, 37);
+          doc.text("Fletzer Baumdokumentation", 20, 9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(120, 120, 120);
+          doc.text(`${address} · ${date}`, 190, 9, { align: 'right' });
+
+          // Titel
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.setTextColor(18, 57, 37);
+          doc.text(`FOTO ${idx + 1}: ${p.title.toUpperCase()}`, 20, 24);
+
+          // Bildbereich skaliert
+          const boxW = 170, boxH = 145;
+          let w = boxW, h = (p.height / p.width) * boxW;
+          if (h > boxH) {
+            h = boxH;
+            w = (p.width / p.height) * boxH;
+          }
+          const x = 20 + (boxW - w) / 2;
+          const y = 30 + (boxH - h) / 2;
+
+          doc.setFillColor(240, 240, 240);
+          doc.roundedRect(20, 30, boxW, boxH, 2, 2, 'F');
+          doc.addImage(p.dataUrl, 'JPEG', x, y, w, h);
+
+          // Beschreibung
+          doc.setDrawColor(220, 220, 220);
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(20, 185, 170, 85, 2, 2, 'FD');
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.setTextColor(18, 57, 37);
+          doc.text("BEFUND & BESCHREIBUNG:", 26, 196);
+          doc.line(26, 199, 184, 199);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9.5);
+          doc.setTextColor(40, 40, 40);
+          const splitDesc = doc.splitTextToSize(p.description || '-', 158);
+          doc.text(splitDesc, 26, 208);
+
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text(`Fletzer Baumdokumentation · Seite ${idx + 2} von ${photos.length + 1}`, 105, 287, { align: 'center' });
+        });
+
+        // Download auslösen
+        doc.save(`Baumbericht_${client.replace(/\s+/g, '_')}.pdf`);
+      } catch (err) {
+        alert("Fehler beim Erstellen der PDF: " + err.message);
+      } finally {
+        btnDownload.disabled = false;
+        btnDownload.innerText = '📄 PDF-Report herunterladen';
+      }
+    };
+  </script>
+</body>
+</html>
