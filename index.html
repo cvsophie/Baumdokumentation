@@ -90,7 +90,7 @@
         <input type="file" id="inputFiles" multiple accept="image/*" class="hidden">
         <input type="file" id="inputFolder" webkitdirectory directory multiple class="hidden">
 
-        <!-- Upload Buttons (sauber getrennt, keine Klick-Konflikte) -->
+        <!-- Upload Buttons -->
         <div class="grid grid-cols-2 gap-3">
           <button type="button" id="btnTriggerFiles" class="w-full py-3 px-3 bg-white border-2 border-dashed border-gray-300 hover:border-emerald-700 rounded-xl text-center transition flex flex-col items-center justify-center">
             <span class="text-xl">📸</span>
@@ -176,7 +176,7 @@
       }
     });
 
-    // Bildverarbeitung (Skalieren auf web-freundliche Größe gegen Speicherabstürze)
+    // Bildverarbeitung (Skalieren auf max. 1400px gegen Speicherüberlastung)
     function processImage(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -285,6 +285,7 @@
         const notes = document.getElementById('notes').value || '';
 
         // --- SEITE 1: STAMMDATEN ---
+        // Grünes Banner oben
         doc.setFillColor(18, 57, 37); // dunkelgrün
         doc.rect(0, 0, 210, 28, 'F');
         doc.setTextColor(255, 255, 255);
@@ -295,16 +296,18 @@
         doc.setFont('helvetica', 'normal');
         doc.text("BAUMKONTROLL-BERICHT", 20, 22);
 
-        // Kasten Stammdaten
-        doc.setDrawColor(220, 220, 220);
+        // Kasten 1: Stammdaten (WEISS)
+        doc.setDrawColor(220, 225, 230);
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(20, 38, 170, 70, 2, 2, 'FD');
+        doc.roundedRect(20, 36, 170, 72, 2, 2, 'FD');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(18, 57, 37);
-        doc.text("1. STAMMDATEN", 26, 48);
-        doc.line(26, 51, 184, 51);
+        doc.text("1. STAMMDATEN", 26, 46);
+        doc.setDrawColor(18, 57, 37);
+        doc.setLineWidth(0.4);
+        doc.line(26, 49, 184, 49);
 
         doc.setFontSize(9);
         const meta = [
@@ -315,7 +318,7 @@
           ["Fotos im Anhang:", `${photos.length} Fotoseite(n)`]
         ];
 
-        let y = 60;
+        let y = 58;
         meta.forEach(([k, v]) => {
           doc.setFont('helvetica', 'bold');
           doc.setTextColor(100, 100, 100);
@@ -326,43 +329,55 @@
           y += 8;
         });
 
-        // Kasten Fazit
-        doc.roundedRect(20, 118, 170, 45, 2, 2, 'FD');
+        // Kasten 2: Fazit (WEISS)
+        doc.setDrawColor(220, 225, 230);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(20, 114, 170, 48, 2, 2, 'FD');
+
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(18, 57, 37);
-        doc.text("2. ZUSAMMENFASSUNG", 26, 128);
-        doc.line(26, 131, 184, 131);
+        doc.text("2. ZUSAMMENFASSUNG", 26, 124);
+        doc.setDrawColor(18, 57, 37);
+        doc.setLineWidth(0.4);
+        doc.line(26, 127, 184, 127);
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         doc.setTextColor(40, 40, 40);
         const splitNotes = doc.splitTextToSize(notes, 158);
-        doc.text(splitNotes, 26, 139);
+        doc.text(splitNotes, 26, 136);
 
-        // Kasten Übersicht
-        doc.roundedRect(20, 173, 170, 95, 2, 2, 'FD');
+        // Kasten 3: Übersicht (WEISS)
+        doc.setDrawColor(220, 225, 230);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(20, 168, 170, 100, 2, 2, 'FD');
+
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(18, 57, 37);
-        doc.text("3. ÜBERSICHT DER BILDDOKUMENTATION", 26, 183);
-        doc.line(26, 186, 184, 186);
+        doc.text("3. ÜBERSICHT DER BILDDOKUMENTATION", 26, 178);
+        doc.setDrawColor(18, 57, 37);
+        doc.setLineWidth(0.4);
+        doc.line(26, 181, 184, 181);
 
-        let py = 195;
+        let py = 190;
         doc.setFontSize(8.5);
         if (photos.length === 0) {
           doc.setFont('helvetica', 'italic');
           doc.setTextColor(120, 120, 120);
           doc.text("Keine Fotos vorhanden.", 26, py);
         } else {
-          photos.slice(0, 9).forEach((p, i) => {
+          photos.slice(0, 10).forEach((p, i) => {
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(30, 30, 30);
             doc.text(`Seite ${i + 2}: ${p.title}`, 26, py);
             py += 7;
           });
-          if (photos.length > 9) {
-            doc.text(`... und ${photos.length - 9} weitere Fotoseiten.`, 26, py);
+          if (photos.length > 10) {
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(120, 120, 120);
+            doc.text(`... und ${photos.length - 10} weitere Fotoseiten.`, 26, py);
           }
         }
 
@@ -401,12 +416,12 @@
           const x = 20 + (boxW - w) / 2;
           const y = 30 + (boxH - h) / 2;
 
-          doc.setFillColor(240, 240, 240);
+          doc.setFillColor(245, 245, 245);
           doc.roundedRect(20, 30, boxW, boxH, 2, 2, 'F');
           doc.addImage(p.dataUrl, 'JPEG', x, y, w, h);
 
-          // Beschreibung
-          doc.setDrawColor(220, 220, 220);
+          // Kasten Befund & Beschreibung (WEISS)
+          doc.setDrawColor(220, 225, 230);
           doc.setFillColor(255, 255, 255);
           doc.roundedRect(20, 185, 170, 85, 2, 2, 'FD');
 
@@ -414,6 +429,8 @@
           doc.setFontSize(10);
           doc.setTextColor(18, 57, 37);
           doc.text("BEFUND & BESCHREIBUNG:", 26, 196);
+          doc.setDrawColor(18, 57, 37);
+          doc.setLineWidth(0.3);
           doc.line(26, 199, 184, 199);
 
           doc.setFont('helvetica', 'normal');
