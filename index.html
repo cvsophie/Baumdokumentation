@@ -1,1271 +1,345 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-stone-50">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fletzer Baumdokumentation</title>
-  
-  <!-- External Fonts: Inter -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF direkt via CDN für robuste, absturzfreie PDF-Generierung -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- html2pdf.js Bundle for Client-Side PDF Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Print & PDF formatting specifications */
-    @media print {
-      body {
-        background: white !important;
-        color: black !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .page-break {
-        page-break-after: always !important;
-        break-after: page !important;
-      }
-    }
-
-    /* Fixed A4 dimensions for PDF rendering */
-    .pdf-page {
-      width: 210mm;
-      min-height: 297mm;
-      max-height: 297mm;
-      padding: 16mm 16mm;
-      box-sizing: border-box;
-      background: #ffffff;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .page-break {
-      page-break-after: always;
-      break-after: page;
-    }
-
-    .dragover {
-      border-color: #064e3b !important;
-      background-color: #ecfdf5 !important;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    .bg-forest { background-color: #123925; }
+    .text-forest { color: #123925; }
+    .border-forest { border-color: #123925; }
+    .hover-bg-forest-dark:hover { background-color: #0c2618; }
   </style>
 </head>
-
-<body class="min-h-full flex flex-col font-sans text-stone-800 antialiased bg-stone-50 selection:bg-emerald-100 selection:text-emerald-900">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased">
 
   <!-- Header -->
-  <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <div class="flex items-center space-x-3.5">
-        <div class="w-11 h-11 rounded-xl bg-emerald-950 text-white flex items-center justify-center shadow-md ring-1 ring-black/5">
-          <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22v-7"></path>
-            <path d="M17 12a5 5 0 0 0-10 0c0 1.25.46 2.4 1.22 3.28C8.84 15.9 9.5 17 12 17s3.16-1.1 3.78-1.72A4.97 4.97 0 0 0 17 12z"></path>
-            <path d="m14 7-2-3-2 3"></path>
-          </svg>
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-forest text-white flex items-center justify-center font-bold text-xl shadow-inner">
+          F
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-emerald-950">Fletzer Baumdokumentation</h1>
+          <h1 class="text-xl font-bold tracking-tight text-gray-900">Fletzer Baumdokumentation</h1>
         </div>
       </div>
-
-      <!-- Quick Actions in Nav -->
-      <div class="flex items-center gap-3">
-        <button type="button" id="quickPreviewBtn" class="inline-flex items-center px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-50 hover:border-stone-400 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-800 transition">
-          <svg class="w-4 h-4 mr-2 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Berichtsvorschau
+      <div class="flex items-center gap-2">
+        <button id="emailBtnTop" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm transition">
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Per E-Mail
         </button>
-        <button type="button" id="emailReportBtn" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition active:scale-[0.98] focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-800">
-          <svg class="w-4 h-4 mr-2 text-emerald-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
-          Per E-Mail senden
-        </button>
-        <button type="button" id="downloadPdfBtn" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-emerald-900 rounded-lg hover:bg-emerald-800 shadow-sm transition active:scale-[0.98] focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-800">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span id="downloadBtnText">PDF Exportieren</span>
+        <button id="downloadPdfBtn" type="button" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg text-white bg-forest hover-bg-forest-dark shadow transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span id="downloadBtnText">PDF erstellen & laden</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Body Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Linke Spalte: Stammdaten & Upload -->
+    <div class="lg:col-span-5 space-y-6">
       
-      <!-- Left Column: Master Data Form -->
-      <div class="lg:col-span-5 space-y-6">
+      <!-- Stammdaten Karte -->
+      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <h2 class="text-base font-bold text-gray-900 border-b pb-3 mb-4 flex items-center justify-between">
+          <span>1. Stammdaten (Deckblatt)</span>
+          <span class="text-xs font-normal text-gray-500">Seite 1</span>
+        </h2>
         
-        <!-- Stammdaten Card -->
-        <div class="bg-white rounded-2xl border border-stone-200 shadow-xs p-6">
-          <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
-            <div class="flex items-center space-x-2.5">
-              <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-xs border border-emerald-100">1</span>
-              <h2 class="text-base font-semibold text-stone-900">Stammdaten der Kontrolle</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Auftraggeber *</label>
+            <input type="text" id="clientInput" placeholder="z. B. Stadtgemeinde / Fam. Huber" value="Magistrat Wien - MA 42" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Adresse / Standort *</label>
+            <input type="text" id="addressInput" placeholder="z. B. Schlossallee 12 / Stadtpark Ost" value="Stadtpark Promenade 4" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div class="col-span-1">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">PLZ *</label>
+              <input type="text" id="zipInput" value="1010" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
             </div>
-            <button type="button" id="fillSampleDataBtn" class="text-xs text-emerald-700 hover:text-emerald-900 hover:underline font-medium">
-              Beispieldaten füllen
+            <div class="col-span-2">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Ort *</label>
+              <input type="text" id="cityInput" value="Wien" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Datum der Kontrolle *</label>
+            <input type="date" id="dateInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+          </div>
+
+          <!-- Ist Naturdenkmal (IstND) -->
+          <div class="pt-2 border-t border-gray-100">
+            <div class="flex items-center justify-between p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="isNdCheckbox" class="w-4 h-4 text-emerald-800 rounded border-gray-300 focus:ring-emerald-800">
+                <label for="isNdCheckbox" class="text-sm font-semibold text-gray-800 cursor-pointer">
+                  Naturdenkmal (IstND)
+                </label>
+              </div>
+              <span class="text-xs text-emerald-800 bg-white px-2 py-0.5 rounded font-medium border border-emerald-200">ND-Status</span>
+            </div>
+
+            <div id="ndNumberContainer" class="hidden mt-3">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">ND-Nummer (optional)</label>
+              <input type="text" id="ndNumberInput" placeholder="z. B. ND-W-204" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Gesamtfazit / Anmerkung (Seite 1)</label>
+            <textarea id="summaryNotes" rows="3" placeholder="Zusammenfassung der Kontrolle..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-800 focus:outline-none">Sicht- und Zustandskontrolle planmäßig durchgeführt. Handlungsbedarf bei den markierten Schadstellen dokumentiert.</textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Upload Karte -->
+      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <h2 class="text-base font-bold text-gray-900 border-b pb-3 mb-4">
+          2. Fotos & Ordner hochladen
+        </h2>
+
+        <div id="dropArea" class="border-2 border-dashed border-gray-300 hover:border-emerald-700 rounded-xl p-6 text-center bg-gray-50/60 transition cursor-pointer">
+          <svg class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+          <p class="text-sm font-semibold text-gray-700">Fotos hier hineinziehen oder auswählen</p>
+          <p class="text-xs text-gray-500 mt-1">Unterstützt JPG, PNG, WEBP</p>
+          
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <button type="button" id="btnSelectFiles" class="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-300 rounded-lg hover:bg-gray-100 shadow-sm">
+              Fotos wählen
+            </button>
+            <button type="button" id="btnSelectFolder" class="px-3 py-1.5 text-xs font-semibold bg-forest text-white rounded-lg hover-bg-forest-dark shadow-sm">
+              Ganzen Foto-Ordner wählen
             </button>
           </div>
-
-          <form id="metadataForm" class="space-y-4">
-            <!-- Auftraggeber -->
-            <div>
-              <label for="clientName" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Auftraggeber *</label>
-              <input type="text" id="clientName" placeholder="z. B. Liegenschaftsverwaltung Belvedere" required
-                     class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition" />
-            </div>
-
-            <!-- Adresse -->
-            <div>
-              <label for="address" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Standort / Adresse *</label>
-              <input type="text" id="address" placeholder="z. B. Prinz-Eugen-Straße 27" required
-                     class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition" />
-            </div>
-
-            <!-- PLZ & Ort -->
-            <div class="grid grid-cols-3 gap-3">
-              <div class="col-span-1">
-                <label for="zipCode" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">PLZ *</label>
-                <input type="text" id="zipCode" placeholder="1030" required
-                       class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition" />
-              </div>
-              <div class="col-span-2">
-                <label for="city" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Ort *</label>
-                <input type="text" id="city" placeholder="Wien" required
-                       class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition" />
-              </div>
-            </div>
-
-            <!-- Datum -->
-            <div>
-              <label for="inspectionDate" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Kontrolldatum *</label>
-              <input type="date" id="inspectionDate" required
-                     class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition" />
-            </div>
-
-            <!-- Naturdenkmal (IstND) Toggle & ND-Nummer -->
-            <div class="mt-4 p-4 rounded-xl bg-emerald-50/60 border border-emerald-100">
-              <div class="flex items-start justify-between">
-                <div class="flex items-center h-5">
-                  <input id="isND" type="checkbox"
-                         class="w-4 h-4 text-emerald-800 border-stone-300 rounded focus:ring-emerald-700">
-                  <label for="isND" class="ml-2.5 text-sm font-semibold text-emerald-950 select-none cursor-pointer">
-                    Naturdenkmal (IstND)
-                  </label>
-                </div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
-                  Status
-                </span>
-              </div>
-              <p class="text-xs text-stone-500 mt-1 ml-6.5">Aktivieren, wenn der Baum unter Naturschutz / Denkmalschutz steht.</p>
-
-              <!-- Optional ND Number input -->
-              <div id="ndNumberContainer" class="mt-3.5 hidden pl-6.5 border-l-2 border-emerald-700/30">
-                <label for="ndNumber" class="block text-xs font-semibold uppercase tracking-wider text-emerald-900 mb-1">ND-Registrierungsnummer</label>
-                <input type="text" id="ndNumber" placeholder="z. B. ND-W-412"
-                       class="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 bg-white shadow-2xs transition" />
-              </div>
-            </div>
-
-            <!-- Gesamturteil / Notizen -->
-            <div>
-              <label for="summaryNotes" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Gesamteindruck & Fazit (Deckblatt)</label>
-              <textarea id="summaryNotes" rows="3" placeholder="Zusammenfassung des Pflegebedarfs, Verkehrssicherheit, Maßnahmenempfehlungen..."
-                        class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 focus:border-emerald-800 bg-white shadow-2xs transition"></textarea>
-            </div>
-          </form>
+          <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+          <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden">
         </div>
+      </section>
 
-        <!-- Structure Overview Card -->
-        <div class="bg-emerald-950 text-white p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs uppercase tracking-wider text-emerald-200 font-semibold">Berichtsaufbau</p>
-              <h3 class="text-base font-bold text-white mt-0.5">Automatisches Layout</h3>
-            </div>
-            <span id="pageCountBadge" class="bg-emerald-900 text-emerald-200 border border-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full">
-              1 Seite (Stammdaten)
-            </span>
-          </div>
-          <ul class="text-xs text-emerald-100 mt-3 space-y-1.5 list-disc list-inside">
-            <li><span class="font-semibold text-white">Seite 1:</span> Stammdaten, Standort & Status</li>
-            <li><span class="font-semibold text-white">Seite 2+:</span> 1 Foto & Beschreibung pro DIN A4 Seite</li>
-          </ul>
-
-          <div class="mt-4 pt-4 border-t border-emerald-900/80 flex items-center gap-2">
-            <button id="summaryEmailBtn" type="button" class="w-full text-center py-2 px-3 text-xs font-semibold bg-emerald-900 hover:bg-emerald-800 text-emerald-100 border border-emerald-800 rounded-lg transition flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-              Bericht direkt per Mail weiterleiten
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column: Photo Upload & Finding List -->
-      <div class="lg:col-span-7 space-y-6">
-        
-        <!-- Upload Card -->
-        <div class="bg-white rounded-2xl border border-stone-200 shadow-xs p-6">
-          <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-4">
-            <div class="flex items-center space-x-2.5">
-              <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-xs border border-emerald-100">2</span>
-              <h2 class="text-base font-semibold text-stone-900">Fotos der Baumkontrolle hochladen</h2>
-            </div>
-            <span id="photoCount" class="text-xs font-semibold px-2.5 py-1 bg-stone-100 text-stone-700 rounded-full">
-              0 Fotos geladen
-            </span>
-          </div>
-
-          <!-- Drop Area & Selection Controls -->
-          <div id="dropZone" 
-               class="border-2 border-dashed border-stone-300 rounded-xl p-8 text-center bg-stone-50/70 hover:bg-emerald-50/40 hover:border-emerald-700 transition cursor-pointer relative group">
-            <input type="file" id="fileInput" multiple accept="image/*" class="hidden" />
-            <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden" />
-            
-            <div class="flex flex-col items-center justify-center pointer-events-none">
-              <div class="w-12 h-12 mb-3 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-105 transition transform">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <p class="text-sm font-semibold text-stone-800">
-                Fotos hier ablegen oder per Klick auswählen
-              </p>
-              <p class="text-xs text-stone-500 mt-1 max-w-sm">
-                Unterstützt JPG, PNG, WEBP. Jeder Schnappschuss erhält im PDF-Bericht eine eigene DIN A4 Einzelseite.
-              </p>
-            </div>
-
-            <!-- Upload Action Buttons -->
-            <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" id="selectFilesBtn" 
-                      class="px-3.5 py-1.5 bg-white text-stone-700 text-xs font-semibold rounded-lg border border-stone-300 shadow-2xs hover:bg-stone-50 hover:border-stone-400">
-                Einzelne Fotos wählen
-              </button>
-              <button type="button" id="selectFolderBtn" 
-                      class="px-3.5 py-1.5 bg-emerald-950 text-white text-xs font-semibold rounded-lg shadow-2xs hover:bg-emerald-900">
-                Ganzen Foto-Ordner wählen
-              </button>
-            </div>
-          </div>
-
-          <!-- Photo List Container -->
-          <div class="mt-6">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-500">Fotopositionen & Befunde</h3>
-              <button type="button" id="clearAllBtn" class="text-xs text-rose-600 hover:text-rose-800 font-medium hidden">
-                Alle entfernen
-              </button>
-            </div>
-
-            <div id="photoList" class="space-y-4">
-              <!-- Empty State -->
-              <div id="emptyPhotosState" class="py-12 text-center rounded-xl bg-stone-50 border border-stone-200">
-                <svg class="mx-auto h-9 w-9 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                <p class="mt-2 text-xs font-medium text-stone-500">Noch keine Kontrollfotos hinzugefügt.</p>
-                <p class="text-xs text-stone-400">Lade einen Ordner hoch, um die Fotoseiten automatisch zu generieren.</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
     </div>
+
+    <!-- Rechte Spalte: Foto-Liste & Beschreibungen -->
+    <div class="lg:col-span-7 space-y-6">
+      <section class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between border-b pb-3 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-gray-900">3. Fotoseiten (Je 1 Foto pro Seite)</h2>
+            <p class="text-xs text-gray-500 mt-0.5" id="photoCountNotice">0 Fotos vorhanden</p>
+          </div>
+          <button id="clearAllBtn" type="button" class="text-xs text-red-600 hover:underline font-medium hidden">
+            Alle löschen
+          </button>
+        </div>
+
+        <div id="photosList" class="space-y-5">
+          <div id="emptyPhotosState" class="py-12 text-center text-gray-400">
+            <p class="text-sm">Noch keine Fotos hochgeladen.</p>
+            <p class="text-xs mt-1">Lade oben Fotos hoch – jedes Foto erhält im fertigen Report eine eigene DIN-A4-Seite.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
   </main>
 
-  <!-- Preview Modal -->
-  <div id="previewModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-stone-900/80 backdrop-blur-xs">
-    <div class="min-h-screen px-4 py-8 flex flex-col items-center justify-center">
-      
-      <!-- Top Action Bar inside Modal -->
-      <div class="w-full max-w-4xl bg-white rounded-t-2xl px-6 py-4 flex items-center justify-between border-b border-stone-200 shadow-lg">
-        <div class="flex items-center space-x-2">
-          <div class="w-3 h-3 rounded-full bg-emerald-700"></div>
-          <span class="text-sm font-bold text-stone-900">Druckvorschau & Dokumentengenerierung</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <button type="button" id="modalEmailBtn" class="px-4 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 shadow-2xs flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            Per E-Mail versenden
-          </button>
-          <button type="button" id="modalDownloadPdfBtn" class="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-950 rounded-lg hover:bg-emerald-900 shadow-2xs">
-            Als PDF herunterladen
-          </button>
-          <button type="button" id="closePreviewModalBtn" class="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  <!-- E-Mail Modal -->
+  <div id="emailModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <h3 class="text-lg font-bold text-gray-900">Report per E-Mail versenden</h3>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Empfänger-Adresse</label>
+        <input type="email" id="emailTo" placeholder="kunde@beispiel.at" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800">
       </div>
-
-      <!-- Scrollable Preview Viewport -->
-      <div class="w-full max-w-4xl max-h-[80vh] overflow-y-auto bg-stone-100 p-6 rounded-b-2xl shadow-2xl flex flex-col items-center gap-6">
-        <div id="modalReportContainer" class="bg-stone-300 p-1 rounded-sm shadow-inner flex flex-col gap-6"></div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Betreff</label>
+        <input type="text" id="emailSubject" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800">
       </div>
-
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nachricht</label>
+        <textarea id="emailBody" rows="4" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-800"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="emailCancelBtn" type="button" class="px-4 py-2 border rounded-lg text-sm text-gray-700 hover:bg-gray-50">Abbrechen</button>
+        <button id="emailConfirmBtn" type="button" class="px-4 py-2 bg-forest text-white rounded-lg text-sm font-semibold hover-bg-forest-dark">E-Mail öffnen & senden</button>
+      </div>
     </div>
   </div>
 
-  <!-- Offscreen Container for PDF Generation -->
-  <div class="hidden">
-    <div id="pdfSource"></div>
-  </div>
-
-  <!-- Email Modal Dialog -->
-  <div id="emailModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-stone-900/80 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full border border-stone-200 shadow-2xl overflow-hidden">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-4 bg-emerald-950 text-white flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-emerald-900 flex items-center justify-center text-emerald-300">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white">Baumbericht per E-Mail versenden</h3>
-            <p class="text-[11px] text-emerald-200">Fletzer Baumdokumentation &bull; Export & Weiterleitung</p>
-          </div>
-        </div>
-        <button type="button" id="closeEmailModalBtn" class="text-emerald-300 hover:text-white p-1 rounded-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Modal Body Form -->
-      <form id="emailForm" class="p-6 space-y-4">
-        <div>
-          <label for="recipientEmail" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">
-            Empfänger E-Mail-Adresse *
-          </label>
-          <input type="email" id="recipientEmail" required placeholder="empfaenger@beispiel.at"
-                 class="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 bg-white shadow-2xs transition" />
-        </div>
-
-        <div>
-          <label for="emailSubject" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">
-            Betreff *
-          </label>
-          <input type="text" id="emailSubject" required
-                 class="w-full px-3.5 py-2 text-sm rounded-lg border border-stone-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-800 bg-white shadow-2xs transition" />
-        </div>
-
-        <div>
-          <label for="emailMessage" class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">
-            Nachrichtentext
-          </label>
-          <textarea id="emailMessage" rows="4"
-                    class="w-full px-3.5 py-2 text-xs border border-stone-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-emerald-800 text-stone-800 shadow-2xs transition"></textarea>
-        </div>
-
-        <!-- Info / Dispatch Note -->
-        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 space-y-1">
-          <div class="flex items-center gap-1.5 font-semibold text-emerald-950">
-            <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Automatischer Anhang & Mail-Übergabe
-          </div>
-          <p class="text-[11px] leading-relaxed">
-            Auf unterstützten Geräten wird die PDF-Datei direkt an Ihr Mailprogramm übergeben. Andernfalls wird die PDF heruntergeladen und das E-Mail-Programm mit vorbereitetem Text geöffnet.
-          </p>
-        </div>
-
-        <!-- Modal Footer Actions -->
-        <div class="pt-3 border-t border-stone-100 flex items-center justify-end gap-3">
-          <button type="button" id="cancelEmailModalBtn" class="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-800 bg-stone-100 hover:bg-stone-200 rounded-lg transition">
-            Abbrechen
-          </button>
-          <button type="submit" id="sendEmailSubmitBtn" class="px-4 py-2 text-xs font-semibold text-white bg-emerald-950 hover:bg-emerald-900 rounded-lg shadow-sm transition flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            <span id="sendEmailBtnText">Jetzt Versenden</span>
-          </button>
-        </div>
-      </form>
-
-    </div>
-  </div>
-
-  <!-- Toast Notification element -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <div class="bg-emerald-950 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-sm border border-emerald-900">
-      <svg id="toastIcon" class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      <span id="toastMessage">Mitteilung</span>
-    </div>
+  <!-- Status Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm hidden transition-all duration-300">
+    <span id="toastMsg">Hinweis</span>
   </div>
 
   <script>
-    // Global Application State
-    const state = {
-      photos: [] // Array of { id, dataUrl, title, description, findingType, dateStr }
-    };
+    // App State
+    let photos = [];
+    const dateInput = document.getElementById('dateInput');
+    dateInput.value = new Date().toISOString().split('T')[0];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().split('T')[0];
-      const dateInput = document.getElementById('inspectionDate');
-      if (dateInput) {
-        dateInput.value = today;
-      }
+    // UI Referenzen
+    const isNdCheckbox = document.getElementById('isNdCheckbox');
+    const ndNumberContainer = document.getElementById('ndNumberContainer');
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const folderInput = document.getElementById('folderInput');
+    const btnSelectFiles = document.getElementById('btnSelectFiles');
+    const btnSelectFolder = document.getElementById('btnSelectFolder');
+    const photosList = document.getElementById('photosList');
+    const emptyPhotosState = document.getElementById('emptyPhotosState');
+    const photoCountNotice = document.getElementById('photoCountNotice');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const downloadBtnText = document.getElementById('downloadBtnText');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
 
-      setupEventListeners();
-      setupDragAndDrop();
+    function showToast(msg, duration = 3000) {
+      toastMsg.innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), duration);
+    }
+
+    isNdCheckbox.addEventListener('change', () => {
+      ndNumberContainer.classList.toggle('hidden', !isNdCheckbox.checked);
     });
 
-    function setupEventListeners() {
-      // Navigation & Primary Actions
-      const quickPreviewBtn = document.getElementById('quickPreviewBtn');
-      if (quickPreviewBtn) quickPreviewBtn.addEventListener('click', openPreviewModal);
+    // File Picker Trigger
+    btnSelectFiles.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+    btnSelectFolder.addEventListener('click', (e) => { e.stopPropagation(); folderInput.click(); });
+    dropArea.addEventListener('click', (e) => {
+      if (!e.target.closest('button')) fileInput.click();
+    });
 
-      const emailReportBtn = document.getElementById('emailReportBtn');
-      if (emailReportBtn) emailReportBtn.addEventListener('click', openEmailModal);
+    ['dragenter', 'dragover'].forEach(ev => dropArea.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropArea.classList.add('border-emerald-600', 'bg-emerald-50/30');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dropArea.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropArea.classList.remove('border-emerald-600', 'bg-emerald-50/30');
+    }));
 
-      const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-      if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', generatePDF);
+    dropArea.addEventListener('drop', (e) => {
+      handleFiles(Array.from(e.dataTransfer.files));
+    });
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(Array.from(e.target.files));
+      fileInput.value = '';
+    });
+    folderInput.addEventListener('change', (e) => {
+      handleFiles(Array.from(e.target.files));
+      folderInput.value = '';
+    });
 
-      const fillSampleDataBtn = document.getElementById('fillSampleDataBtn');
-      if (fillSampleDataBtn) fillSampleDataBtn.addEventListener('click', loadSampleData);
-
-      const summaryEmailBtn = document.getElementById('summaryEmailBtn');
-      if (summaryEmailBtn) summaryEmailBtn.addEventListener('click', openEmailModal);
-
-      // File Picker Trigger Buttons
-      const selectFilesBtn = document.getElementById('selectFilesBtn');
-      const fileInput = document.getElementById('fileInput');
-      if (selectFilesBtn && fileInput) {
-        selectFilesBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          fileInput.click();
-        });
-        fileInput.addEventListener('change', (e) => {
-          handleFilesSelected(e.target.files);
-          fileInput.value = '';
-        });
+    clearAllBtn.addEventListener('click', () => {
+      if (confirm('Möchtest du wirklich alle hochgeladenen Fotos entfernen?')) {
+        photos = [];
+        renderPhotosList();
       }
+    });
 
-      const selectFolderBtn = document.getElementById('selectFolderBtn');
-      const folderInput = document.getElementById('folderInput');
-      if (selectFolderBtn && folderInput) {
-        selectFolderBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          folderInput.click();
-        });
-        folderInput.addEventListener('change', (e) => {
-          handleFilesSelected(e.target.files);
-          folderInput.value = '';
-        });
-      }
-
-      // Clear Photos Button
-      const clearAllBtn = document.getElementById('clearAllBtn');
-      if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllPhotos);
-
-      // Metadata Form
-      const isND = document.getElementById('isND');
-      if (isND) isND.addEventListener('change', toggleNDNumberField);
-
-      const metadataForm = document.getElementById('metadataForm');
-      if (metadataForm) {
-        metadataForm.addEventListener('submit', (e) => e.preventDefault());
-      }
-
-      // Preview Modal Buttons
-      const modalEmailBtn = document.getElementById('modalEmailBtn');
-      if (modalEmailBtn) modalEmailBtn.addEventListener('click', openEmailModal);
-
-      const modalDownloadPdfBtn = document.getElementById('modalDownloadPdfBtn');
-      if (modalDownloadPdfBtn) modalDownloadPdfBtn.addEventListener('click', generatePDF);
-
-      const closePreviewModalBtn = document.getElementById('closePreviewModalBtn');
-      if (closePreviewModalBtn) closePreviewModalBtn.addEventListener('click', closePreviewModal);
-
-      // Email Modal Buttons & Form
-      const closeEmailModalBtn = document.getElementById('closeEmailModalBtn');
-      if (closeEmailModalBtn) closeEmailModalBtn.addEventListener('click', closeEmailModal);
-
-      const cancelEmailModalBtn = document.getElementById('cancelEmailModalBtn');
-      if (cancelEmailModalBtn) cancelEmailModalBtn.addEventListener('click', closeEmailModal);
-
-      const emailForm = document.getElementById('emailForm');
-      if (emailForm) emailForm.addEventListener('submit', handleSendEmail);
-    }
-
-    function toggleNDNumberField() {
-      const isND = document.getElementById('isND').checked;
-      const ndContainer = document.getElementById('ndNumberContainer');
-      if (isND) {
-        ndContainer.classList.remove('hidden');
-      } else {
-        ndContainer.classList.add('hidden');
-      }
-      updateSummaryBadge();
-    }
-
-    function setupDragAndDrop() {
-      const dropZone = document.getElementById('dropZone');
-      const fileInput = document.getElementById('fileInput');
-      if (!dropZone) return;
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dropZone.classList.add('dragover');
-        }, false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dropZone.classList.remove('dragover');
-        }, false);
-      });
-
-      dropZone.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        if (dt && dt.files && dt.files.length > 0) {
-          handleFilesSelected(dt.files);
-        }
-      });
-
-      dropZone.addEventListener('click', (e) => {
-        if (e.target.closest('button')) {
-          return;
-        }
-        if (fileInput) {
-          fileInput.click();
-        }
-      });
-    }
-
-    // Reads an image file and safely resizes it (max 1600px width/height) to prevent canvas memory overflow
-    function readAndCompressImage(file) {
+    // Fotos komprimieren und in Base64 umwandeln (verhindert Browser-Abstürze)
+    function processImageFile(file) {
       return new Promise((resolve) => {
+        if (!file.type.startsWith('image/')) return resolve(null);
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
-            const maxDimension = 1600;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > maxDimension || height > maxDimension) {
-              if (width > height) {
-                height = Math.round((height * maxDimension) / width);
-                width = maxDimension;
+            const maxDim = 1600;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
               } else {
-                width = Math.round((width * maxDimension) / height);
-                height = maxDimension;
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
               }
             }
-
             const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = w;
+            canvas.height = h;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // Convert to high-quality JPEG Base64 Data URL (immune to CORS taint)
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-            resolve(dataUrl);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve({
+              id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+              filename: file.name,
+              dataUrl: canvas.toDataURL('image/jpeg', 0.85),
+              width: w,
+              height: h,
+              title: file.name.replace(/\.[^/.]+$/, ""),
+              description: 'Zustandserfassung und Befundung zum Fotomotiv.',
+              status: 'Auffälligkeit'
+            });
           };
-          img.onerror = () => resolve(e.target.result); // Fallback to raw base64
+          img.onerror = () => resolve(null);
           img.src = e.target.result;
         };
-        reader.onerror = () => resolve('');
+        reader.onerror = () => resolve(null);
         reader.readAsDataURL(file);
       });
     }
 
-    async function handleFilesSelected(fileList) {
-      if (!fileList || fileList.length === 0) return;
+    async function handleFiles(files) {
+      const validFiles = files.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+      if (!validFiles.length) {
+        showToast('Keine Bilddateien gefunden.');
+        return;
+      }
+      showToast(`${validFiles.length} Bild(er) werden vorbereitet...`);
+      const processed = await Promise.all(validFiles.map(processImageFile));
+      const successful = processed.filter(Boolean);
+      photos = [...photos, ...successful];
+      renderPhotosList();
+      showToast(`${successful.length} Fotos hinzugefügt.`);
+    }
 
-      const validFiles = Array.from(fileList).filter(f => {
-        const isImageMime = f.type && f.type.startsWith('image/');
-        const isImageExt = /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name);
-        return isImageMime || isImageExt;
-      });
+    function renderPhotosList() {
+      photoCountNotice.innerText = `${photos.length} Foto(s) im Report (=${photos.length + 1} Seiten gesamt)`;
+      clearAllBtn.classList.toggle('hidden', photos.length === 0);
 
-      if (validFiles.length === 0) {
-        showToast('Keine Bilddateien im Ordner oder der Auswahl gefunden.', true);
+      if (photos.length === 0) {
+        emptyPhotosState.classList.remove('hidden');
+        photosList.innerHTML = '';
+        photosList.appendChild(emptyPhotosState);
         return;
       }
 
-      showToast(`Verarbeite ${validFiles.length} Foto(s)...`);
+      emptyPhotosState.classList.add('hidden');
+      photosList.innerHTML = '';
 
-      // Natural alphanumeric sort
-      validFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
-      for (const file of validFiles) {
-        const id = 'img_' + Math.random().toString(36).substr(2, 9);
-        const dataUrl = await readAndCompressImage(file);
-        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-
-        state.photos.push({
-          id,
-          dataUrl,
-          title: cleanName,
-          description: '',
-          findingType: 'Befund / Auffälligkeit',
-          dateStr: new Date(file.lastModified || Date.now()).toLocaleDateString('de-DE')
-        });
-      }
-
-      renderPhotoCards();
-      updateSummaryBadge();
-      showToast(`${validFiles.length} Foto(s) erfolgreich hinzugefügt!`);
-    }
-
-    function renderPhotoCards() {
-      const photoList = document.getElementById('photoList');
-      const emptyState = document.getElementById('emptyPhotosState');
-      const clearBtn = document.getElementById('clearAllBtn');
-      const photoCountEl = document.getElementById('photoCount');
-
-      photoCountEl.textContent = `${state.photos.length} Foto(s) erfasst`;
-
-      if (state.photos.length === 0) {
-        photoList.innerHTML = '';
-        photoList.appendChild(emptyState);
-        emptyState.classList.remove('hidden');
-        clearBtn.classList.add('hidden');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      clearBtn.classList.remove('hidden');
-      photoList.innerHTML = '';
-
-      state.photos.forEach((photo, index) => {
-        const card = document.createElement('div');
-        card.className = "p-4 bg-white rounded-xl border border-stone-200 shadow-2xs hover:border-stone-300 transition flex flex-col md:flex-row gap-4 relative group";
-
-        // Thumbnail container
-        const thumbCol = document.createElement('div');
-        thumbCol.className = "relative w-full md:w-44 h-36 shrink-0 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center";
-
-        const img = document.createElement('img');
-        img.src = photo.dataUrl;
-        img.alt = photo.title;
-        img.className = "w-full h-full object-cover";
-        thumbCol.appendChild(img);
-
-        const pageBadge = document.createElement('span');
-        pageBadge.className = "absolute top-2 left-2 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950/90 text-white shadow-xs";
-        pageBadge.textContent = `Seite ${index + 2}`;
-        thumbCol.appendChild(pageBadge);
-
-        // Meta & inputs container
-        const contentCol = document.createElement('div');
-        contentCol.className = "flex-1 space-y-3";
-
-        // Header row with title & ordering buttons
-        const headerRow = document.createElement('div');
-        headerRow.className = "flex items-center justify-between gap-2";
-
-        const titleInput = document.createElement('input');
-        titleInput.type = "text";
-        titleInput.value = photo.title;
-        titleInput.placeholder = "Bildtitel / Fotoposition (z.B. Kronenansatz / Stammfuß)";
-        titleInput.className = "text-sm font-semibold text-stone-900 w-full px-2.5 py-1.5 border border-stone-200 rounded-lg focus:border-emerald-800 focus:outline-hidden";
-        titleInput.addEventListener('input', (e) => updatePhotoData(photo.id, 'title', e.target.value));
-
-        const btnGroup = document.createElement('div');
-        btnGroup.className = "flex items-center space-x-1 shrink-0";
-
-        // Move Up Button
-        const upBtn = document.createElement('button');
-        upBtn.type = "button";
-        upBtn.title = "Nach oben";
-        upBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>`;
-        if (index === 0) {
-          upBtn.disabled = true;
-          upBtn.className = "opacity-30 cursor-not-allowed p-1";
-        } else {
-          upBtn.className = "p-1 text-stone-500 hover:text-stone-800";
-          upBtn.addEventListener('click', () => movePhoto(index, -1));
-        }
-
-        // Move Down Button
-        const downBtn = document.createElement('button');
-        downBtn.type = "button";
-        downBtn.title = "Nach unten";
-        downBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
-        if (index === state.photos.length - 1) {
-          downBtn.disabled = true;
-          downBtn.className = "opacity-30 cursor-not-allowed p-1";
-        } else {
-          downBtn.className = "p-1 text-stone-500 hover:text-stone-800";
-          downBtn.addEventListener('click', () => movePhoto(index, 1));
-        }
-
-        // Delete Button
-        const delBtn = document.createElement('button');
-        delBtn.type = "button";
-        delBtn.title = "Foto löschen";
-        delBtn.className = "p-1 text-rose-500 hover:text-rose-700";
-        delBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`;
-        delBtn.addEventListener('click', () => removePhoto(photo.id));
-
-        btnGroup.appendChild(upBtn);
-        btnGroup.appendChild(downBtn);
-        btnGroup.appendChild(delBtn);
-
-        headerRow.appendChild(titleInput);
-        headerRow.appendChild(btnGroup);
-
-        // Classification Row
-        const categoryRow = document.createElement('div');
-        categoryRow.className = "flex items-center gap-2";
-
-        const catLabel = document.createElement('label');
-        catLabel.className = "text-[11px] font-semibold uppercase tracking-wider text-stone-500 shrink-0";
-        catLabel.textContent = "Einstufung:";
-
-        const catSelect = document.createElement('select');
-        catSelect.className = "text-xs bg-stone-50 border border-stone-200 rounded-md px-2.5 py-1 text-stone-700 font-medium focus:outline-hidden focus:border-emerald-800";
-
-        const categories = [
-          { val: "Befund / Auffälligkeit", text: "⚠️ Befund / Auffälligkeit" },
-          { val: "Totholz / Kronenschnitt", text: "✂️ Handlungsbedarf / Schnitt" },
-          { val: "Pilzfruchtkörper / Fäule", text: "🍄 Pilzbefall / Holzzersetzung" },
-          { val: "Standsicherheit / Wurzelraum", text: "🌱 Wurzelbereich / Boden" },
-          { val: "Normalzustand / Habitus", text: "✅ Gesamteindruck / Normalzustand" },
-          { val: "Dokumentation", text: "📷 Allgemeine Dokumentation" }
-        ];
-
-        categories.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.val;
-          opt.textContent = c.text;
-          if (c.val === photo.findingType) opt.selected = true;
-          catSelect.appendChild(opt);
-        });
-
-        catSelect.addEventListener('change', (e) => updatePhotoData(photo.id, 'findingType', e.target.value));
-
-        categoryRow.appendChild(catLabel);
-        categoryRow.appendChild(catSelect);
-
-        // Description Row
-        const descRow = document.createElement('div');
-        const descArea = document.createElement('textarea');
-        descArea.rows = 2;
-        descArea.value = photo.description;
-        descArea.placeholder = "Detaillierte Beschreibung des Befunds, Symptome, Messwerte oder Dringlichkeit der Maßnahme...";
-        descArea.className = "w-full px-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-hidden focus:border-emerald-800 text-stone-800 placeholder-stone-400 bg-stone-50/50 resize-y";
-        descArea.addEventListener('input', (e) => updatePhotoData(photo.id, 'description', e.target.value));
-        descRow.appendChild(descArea);
-
-        contentCol.appendChild(headerRow);
-        contentCol.appendChild(categoryRow);
-        contentCol.appendChild(descRow);
-
-        card.appendChild(thumbCol);
-        card.appendChild(contentCol);
-        photoList.appendChild(card);
-      });
-    }
-
-    function updatePhotoData(id, key, val) {
-      const item = state.photos.find(p => p.id === id);
-      if (item) {
-        item[key] = val;
-      }
-    }
-
-    function movePhoto(index, offset) {
-      const newIndex = index + offset;
-      if (newIndex < 0 || newIndex >= state.photos.length) return;
-      const [item] = state.photos.splice(index, 1);
-      state.photos.splice(newIndex, 0, item);
-      renderPhotoCards();
-      updateSummaryBadge();
-    }
-
-    function removePhoto(id) {
-      const idx = state.photos.findIndex(p => p.id === id);
-      if (idx !== -1) {
-        state.photos.splice(idx, 1);
-        renderPhotoCards();
-        updateSummaryBadge();
-        showToast('Foto entfernt.');
-      }
-    }
-
-    function clearAllPhotos() {
-      state.photos = [];
-      renderPhotoCards();
-      updateSummaryBadge();
-      showToast('Alle Fotos wurden entfernt.');
-    }
-
-    function updateSummaryBadge() {
-      const count = state.photos.length;
-      const totalPages = count + 1;
-      const badge = document.getElementById('pageCountBadge');
-      if (badge) {
-        badge.textContent = `${totalPages} Seite(n) gesamt (${count} Bildseite${count === 1 ? '' : 'n'})`;
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function buildReportHTML() {
-      const client = document.getElementById('clientName').value.trim() || 'Nicht angegeben';
-      const address = document.getElementById('address').value.trim() || 'Nicht angegeben';
-      const zip = document.getElementById('zipCode').value.trim() || '';
-      const city = document.getElementById('city').value.trim() || '';
-      const locationFull = `${address}, ${zip} ${city}`.trim();
-      const dateVal = document.getElementById('inspectionDate').value;
-      const dateFormatted = dateVal ? new Date(dateVal).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : new Date().toLocaleDateString('de-DE');
-      const isND = document.getElementById('isND').checked;
-      const ndNumber = document.getElementById('ndNumber').value.trim();
-      const summaryNotes = document.getElementById('summaryNotes').value.trim() || 'Die Dokumentation umfasst die nachfolgenden, während der Regelkontrolle festgehaltenen Fotopositionen und Zustandsbefunde.';
-
-      const totalPages = 1 + state.photos.length;
-
-      let html = '';
-
-      // Page 1: Stammdaten & Zusammenfassung
-      html += `
-        <div class="pdf-page page-break font-sans bg-white text-stone-900 border border-stone-200">
-          <div>
-            <div class="flex items-center justify-between border-b-2 border-emerald-950 pb-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-950 text-white flex items-center justify-center font-bold text-base shadow-xs">
-                  F
-                </div>
-                <div>
-                  <h1 class="text-lg font-bold tracking-tight text-emerald-950">Fletzer Baumdokumentation</h1>
-                  <p class="text-[11px] text-stone-500 font-medium">Fachgerechte Baumkontrolle &bull; Befunddokumentation</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <span class="inline-block px-3 py-1 bg-stone-100 text-stone-800 text-xs font-semibold rounded-md uppercase tracking-wider">
-                  Prüfbericht
-                </span>
-                <p class="text-xs text-stone-500 mt-1">Datum: <strong class="text-stone-800">${escapeHtml(dateFormatted)}</strong></p>
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <h2 class="text-xl font-bold text-stone-900">Kontroll- & Zustandsbericht</h2>
-              <p class="text-sm text-stone-600">Dokumentation gemäß Baumkontrollrichtlinien und Verkehrssicherungspflicht.</p>
-            </div>
-
-            <div class="mt-6 rounded-xl border border-stone-200 overflow-hidden shadow-2xs">
-              <div class="bg-emerald-950 px-4 py-2 text-white text-xs font-bold uppercase tracking-wider">
-                Stammdaten & Objektinformationen
-              </div>
-              <div class="divide-y divide-stone-200 text-xs">
-                <div class="grid grid-cols-3 px-4 py-2.5 bg-stone-50/70">
-                  <span class="font-semibold text-stone-600">Auftraggeber:</span>
-                  <span class="col-span-2 font-medium text-stone-900">${escapeHtml(client)}</span>
-                </div>
-                <div class="grid grid-cols-3 px-4 py-2.5 bg-white">
-                  <span class="font-semibold text-stone-600">Standort / Adresse:</span>
-                  <span class="col-span-2 font-medium text-stone-900">${escapeHtml(locationFull)}</span>
-                </div>
-                <div class="grid grid-cols-3 px-4 py-2.5 bg-stone-50/70">
-                  <span class="font-semibold text-stone-600">Kontrolldatum:</span>
-                  <span class="col-span-2 font-medium text-stone-900">${escapeHtml(dateFormatted)}</span>
-                </div>
-                <div class="grid grid-cols-3 px-4 py-2.5 bg-white items-center">
-                  <span class="font-semibold text-stone-600">Naturdenkmal (IstND):</span>
-                  <div class="col-span-2">
-                    ${isND 
-                      ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                          JA &ndash; Naturdenkmal
-                         </span>
-                         ${ndNumber ? `<span class="ml-2 font-mono text-xs font-semibold text-stone-700">(ND-Nr.: ${escapeHtml(ndNumber)})</span>` : ''}`
-                      : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-600">
-                          NEIN &ndash; Kein Naturdenkmal
-                         </span>`
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-6 rounded-xl border border-stone-200 p-4 bg-stone-50/50">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-950 mb-2">Gesamteindruck & Fazit der Begehung</h3>
-              <p class="text-xs text-stone-700 leading-relaxed whitespace-pre-wrap">${escapeHtml(summaryNotes)}</p>
-            </div>
-
-            <div class="mt-6">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-stone-600 mb-2">Erfasste Fotodokumentation (${state.photos.length} Positionen)</h3>
-              ${state.photos.length === 0 
-                ? `<p class="text-xs italic text-stone-400">Keine Fotoseiten hinzugefügt.</p>`
-                : `<div class="rounded-lg border border-stone-200 overflow-hidden">
-                    <table class="w-full text-left text-xs">
-                      <thead class="bg-stone-100 text-stone-600 border-b border-stone-200 font-semibold">
-                        <tr>
-                          <th class="py-1.5 px-3 w-16">Seite</th>
-                          <th class="py-1.5 px-3">Position / Bildtitel</th>
-                          <th class="py-1.5 px-3 w-48">Kategorie</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-stone-200">
-                        ${state.photos.map((p, i) => `
-                          <tr class="hover:bg-stone-50">
-                            <td class="py-1.5 px-3 font-bold text-emerald-800">S. ${i + 2}</td>
-                            <td class="py-1.5 px-3 font-medium text-stone-800">${escapeHtml(p.title || 'Foto ' + (i+1))}</td>
-                            <td class="py-1.5 px-3 text-stone-600">${escapeHtml(p.findingType)}</td>
-                          </tr>
-                        `).join('')}
-                      </tbody>
-                    </table>
-                   </div>`
-              }
-            </div>
+      photos.forEach((photo, idx) => {
+        const item = document.createElement('div');
+        item.className = 'border border-gray-200 rounded-xl p-4 bg-white flex flex-col md:flex-row gap-4 items-start shadow-sm';
+        item.innerHTML = `
+          <div class="relative w-full md:w-44 h-36 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+            <img src="${photo.dataUrl}" alt="Vorschau" class="w-full h-full object-cover">
+            <span class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2 py-0.5 rounded">
+              Seite ${idx + 2}
+            </span>
           </div>
 
-          <div class="pt-4 border-t border-stone-200 flex items-center justify-between text-[10px] text-stone-400">
-            <span>Fletzer Baumdokumentation &bull; Professionelle Baumpflege & Kontrolle</span>
-            <span>Seite 1 von ${totalPages}</span>
-          </div>
-        </div>
-      `;
-
-      // Pages 2+: 1 photo per page
-      state.photos.forEach((photo, index) => {
-        const pageNumber = index + 2;
-        html += `
-          <div class="pdf-page page-break font-sans bg-white text-stone-900 border border-stone-200">
-            <div>
-              <div class="flex items-center justify-between border-b border-stone-200 pb-3">
-                <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 rounded bg-emerald-950 text-white flex items-center justify-center font-bold text-xs">
-                    F
-                  </div>
-                  <span class="text-xs font-bold uppercase tracking-wider text-emerald-950">Fletzer Baumdokumentation</span>
-                </div>
-                <div class="text-right text-[11px] text-stone-500">
-                  <span>Standort: <strong class="text-stone-700">${escapeHtml(address)}</strong></span>
-                </div>
-              </div>
-
-              <div class="mt-3 flex items-center justify-between bg-stone-50 px-3.5 py-2 rounded-lg border border-stone-200">
-                <div class="flex items-center space-x-2.5">
-                  <span class="w-6 h-6 rounded-md bg-emerald-950 text-white flex items-center justify-center font-bold text-xs">
-                    ${index + 1}
-                  </span>
-                  <h3 class="text-sm font-bold text-stone-900">
-                    ${escapeHtml(photo.title || 'Fotoposition ' + (index + 1))}
-                  </h3>
-                </div>
-                <span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100/80 text-emerald-950 border border-emerald-200">
-                  ${escapeHtml(photo.findingType)}
-                </span>
-              </div>
-
-              <div class="mt-3 w-full h-[162mm] bg-stone-100 rounded-xl overflow-hidden border border-stone-200 flex items-center justify-center">
-                <img src="${photo.dataUrl}" alt="${escapeHtml(photo.title)}" class="w-full h-full object-contain" />
-              </div>
-
-              <div class="mt-3 rounded-xl border border-stone-200 bg-white p-3.5 shadow-2xs">
-                <div class="flex items-center justify-between pb-1.5 border-b border-stone-100 mb-1.5">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-950">Befundbeschreibung & Maßnahmen</h4>
-                  <span class="text-[10px] text-stone-400 font-mono">Aufnahmedatum: ${escapeHtml(photo.dateStr)}</span>
-                </div>
-                <p class="text-xs text-stone-800 leading-relaxed whitespace-pre-wrap min-h-[44px]">
-                  ${photo.description ? escapeHtml(photo.description) : '<span class="italic text-stone-400">Keine spezifische Befundbeschreibung eingetragen. Zustand entspricht der visuellen Kontrolle.</span>'}
-                </p>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-stone-200 flex items-center justify-between text-[10px] text-stone-400">
-              <span>Auftraggeber: ${escapeHtml(client)} &bull; ${escapeHtml(dateFormatted)}</span>
-              <span>Seite ${pageNumber} von ${totalPages}</span>
-            </div>
-          </div>
-        `;
-      });
-
-      return html;
-    }
-
-    function openPreviewModal() {
-      const modal = document.getElementById('previewModal');
-      const container = document.getElementById('modalReportContainer');
-      container.innerHTML = buildReportHTML();
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closePreviewModal() {
-      const modal = document.getElementById('previewModal');
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-
-    function openEmailModal() {
-      const modal = document.getElementById('emailModal');
-      const client = document.getElementById('clientName').value.trim() || 'Unbenannt';
-      const address = document.getElementById('address').value.trim() || 'Standort';
-      const dateVal = document.getElementById('inspectionDate').value;
-      const dateFormatted = dateVal ? new Date(dateVal).toLocaleDateString('de-DE') : new Date().toLocaleDateString('de-DE');
-
-      const subjectInput = document.getElementById('emailSubject');
-      const messageInput = document.getElementById('emailMessage');
-
-      subjectInput.value = `Baumkontrollbericht - ${client} (${address})`;
-      messageInput.value = `Sehr geehrte Damen und Herren,\n\nanbei erhalten Sie den aktuellen Zustands- und Kontrollbericht der Fletzer Baumdokumentation für die Liegenschaft:\n\nStandort: ${address}\nDatum der Begehung: ${dateFormatted}\nAnzahl dokumentierter Bildpositionen: ${state.photos.length}\n\nMit freundlichen Grüßen,\nFletzer Baumdokumentation`;
-
-      modal.classList.remove('hidden');
-      document.getElementById('recipientEmail').focus();
-    }
-
-    function closeEmailModal() {
-      const modal = document.getElementById('emailModal');
-      modal.classList.add('hidden');
-    }
-
-    // Ensures all images in container are decoded by browser prior to PDF compilation
-    async function waitForImagesToLoad(container) {
-      const imgs = Array.from(container.querySelectorAll('img'));
-      const promises = imgs.map((img) => {
-        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // continue even if one fails
-        });
-      });
-      await Promise.all(promises);
-    }
-
-    async function createPdfBlob() {
-      if (typeof html2pdf === 'undefined') {
-        throw new Error('PDF-Bibliothek ist nicht geladen.');
-      }
-
-      const client = document.getElementById('clientName').value.trim() || 'Bericht';
-      const addressVal = document.getElementById('address').value.trim() || 'Standort';
-      const dateVal = document.getElementById('inspectionDate').value || new Date().toISOString().split('T')[0];
-      const filename = `Baumbericht_${client.replace(/[^a-zA-Z0-9]/g, '_')}_${addressVal.replace(/[^a-zA-Z0-9]/g, '_')}_${dateVal}.pdf`;
-
-      const pdfSource = document.getElementById('pdfSource');
-      pdfSource.innerHTML = buildReportHTML();
-      await waitForImagesToLoad(pdfSource);
-
-      const opt = {
-        margin: 0,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: {
-          scale: 1.5,
-          useCORS: false, // Disabling prevents CORS exceptions on data URLs
-          logging: false,
-          letterRendering: true
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait'
-        },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
-
-      const worker = html2pdf().set(opt).from(pdfSource);
-      const pdfBlob = await worker.outputPdf('blob');
-      pdfSource.innerHTML = ''; // Clean up memory
-      return { blob: pdfBlob, filename: filename };
-    }
-
-    async function handleSendEmail(e) {
-      e.preventDefault();
-      const recipient = document.getElementById('recipientEmail').value.trim();
-      const subject = document.getElementById('emailSubject').value.trim();
-      const message = document.getElementById('emailMessage').value.trim();
-
-      if (!recipient) {
-        showToast('Bitte geben Sie eine gültige E-Mail-Adresse an.', true);
-        return;
-      }
-
-      const submitBtn = document.getElementById('sendEmailSubmitBtn');
-      const submitText = document.getElementById('sendEmailBtnText');
-      submitBtn.disabled = true;
-      submitText.textContent = 'Bereite PDF vor...';
-
-      try {
-        const { blob, filename } = await createPdfBlob();
-        const pdfFile = new File([blob], filename, { type: 'application/pdf' });
-
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          await navigator.share({
-            title: subject,
-            text: message,
-            files: [pdfFile]
-          });
-          showToast('Bericht erfolgreich an Ihr Mail-Programm übergeben.');
-          closeEmailModal();
-          return;
-        }
-
-        const downloadUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        const mailtoUrl = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message + `\n\n[Hinweis: Der Bericht "${filename}" wurde soeben automatisch heruntergeladen. Bitte fügen Sie diesen Ihrer E-Mail als Anhang bei.]`)}`;
-        window.location.href = mailtoUrl;
-
-        showToast('PDF heruntergeladen & E-Mail-Programm aufgerufen!');
-        closeEmailModal();
-
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('Mail dispatch error:', err);
-          showToast('Konnte E-Mail nicht automatisch starten: ' + err.message, true);
-        }
-      } finally {
-        submitBtn.disabled = false;
-        submitText.textContent = 'Jetzt Versenden';
-      }
-    }
-
-    async function generatePDF() {
-      if (typeof html2pdf === 'undefined') {
-        showToast('Fehler: Die externe PDF-Bibliothek konnte nicht geladen werden.', true);
-        return;
-      }
-
-      const client = document.getElementById('clientName').value.trim() || 'Bericht';
-      const addressVal = document.getElementById('address').value.trim() || 'Standort';
-      const dateVal = document.getElementById('inspectionDate').value || new Date().toISOString().split('T')[0];
-      const filename = `Baumbericht_${client.replace(/[^a-zA-Z0-9]/g, '_')}_${addressVal.replace(/[^a-zA-Z0-9]/g, '_')}_${dateVal}.pdf`;
-
-      const downloadBtn = document.getElementById('downloadPdfBtn');
-      const downloadText = document.getElementById('downloadBtnText');
-      const originalText = downloadText.textContent;
-
-      downloadBtn.disabled = true;
-      downloadBtn.classList.add('opacity-75', 'cursor-wait');
-      downloadText.textContent = 'Erstelle PDF...';
-
-      showToast('PDF-Generierung gestartet...');
-
-      try {
-        const pdfSource = document.getElementById('pdfSource');
-        pdfSource.innerHTML = buildReportHTML();
-        await waitForImagesToLoad(pdfSource);
-
-        const opt = {
-          margin: 0,
-          filename: filename,
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { 
-            scale: 1.5, 
-            useCORS: false, 
-            logging: false,
-            letterRendering: true
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          },
-          pagebreak: { mode: ['css', 'legacy'] }
-        };
-
-        await html2pdf().set(opt).from(pdfSource).save();
-        pdfSource.innerHTML = ''; // Clean up memory
-        showToast('PDF erfolgreich heruntergeladen!');
-
-      } catch (err) {
-        console.error('PDF Export Error:', err);
-        showToast('Fehler bei der PDF-Erstellung: ' + (err.message || 'Speicherüberlauf'), true);
-      } finally {
-        downloadBtn.disabled = false;
-        downloadBtn.classList.remove('opacity-75', 'cursor-wait');
-        downloadText.textContent = originalText;
-      }
-    }
-
-    function loadSampleData() {
-      document.getElementById('clientName').value = 'Liegenschaftsverwaltung Belvedere';
-      document.getElementById('address').value = 'Prinz-Eugen-Straße 27, Südgarten';
-      document.getElementById('zipCode').value = '1030';
-      document.getElementById('city').value = 'Wien';
-
-      const isND = document.getElementById('isND');
-      isND.checked = true;
-      toggleNDNumberField();
-      document.getElementById('ndNumber').value = 'ND-W-1030/14';
-
-      document.getElementById('summaryNotes').value = 'Regelmäßige Baumkontrolle zur Wahrung der Verkehrssicherheitspflicht.\nKrone weist vereinzeltes Schwachasttotholz auf. Standsicherheit nach aktuellem Befund voll gegeben. Maßnahmen zur Kronenpflege im Feinastbereich werden bis Herbst empfohlen.';
-
-      showToast('Beispieldaten erfolgreich eingefügt.');
-    }
-
-    function showToast(message, isError = false) {
-      const toast = document.getElementById('toast');
-      const toastMessage = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-
-      toastMessage.textContent = message;
-      if (isError) {
-        toastIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>`;
-        toastIcon.classList.remove('text-emerald-400');
-        toastIcon.classList.add('text-rose-400');
-      } else {
-        toastIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>`;
-        toastIcon.classList.remove('text-rose-400');
-        toastIcon.classList.add('text-emerald-400');
-      }
-
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-        toast.classList.remove('translate-y-0', 'opacity-100');
-      }, 3500);
-    }
-  </script>
-</body>
-</html>
+          <div class="flex-1 w-full space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <input type="text" value="${escapeHtml(photo.title)}" class="font-bold text-sm text-gray-900 border-b border-dashed border-gray-300 hover:border-gray-600 focus:border-forest outline-none py-0.5 flex-1" placeholder="Titel / Bezeichnung" data-id="${photo.id}" data-field="title">
+              
+              <select class="text-xs font-semibold px-2.5 py-1 rounded-md border border-gray-300
